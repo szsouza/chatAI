@@ -19,7 +19,7 @@ const chat = () => {
     api: "/api/chat",
   });
   return (
-    <Card className="w-[440px] ">
+    <Card className="w-[600px] ">
       <CardHeader>
         <CardTitle>ChatAI</CardTitle>
         <CardDescription>
@@ -60,7 +60,7 @@ const chat = () => {
       <CardFooter>
         <form className="w-full flex gap-2" onSubmit={handleSubmit}>
           <Input
-            placeholder="how can I help you?"
+            placeholder="Como posso ajudar?"
             value={input}
             onChange={handleInputChange}
           />
