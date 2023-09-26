@@ -14,7 +14,7 @@ import { Input } from "./ui/input";
 import { useChat } from "ai/react";
 import { ScrollArea } from "./ui/scroll-area";
 
-const chat = () => {
+const Chat = () => {
   const { messages, handleInputChange, handleSubmit, input } = useChat({
     api: "/api/chat",
   });
@@ -71,4 +71,4 @@ const chat = () => {
   );
 };
 
-export default chat;
+export default Chat;
