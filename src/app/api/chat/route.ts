@@ -1,5 +1,4 @@
-import OpenAI from "openai";
-import { OpenAIStream, StreamingTextResponse } from "ai";
+import { OpenAI } from "openai";
 
 // Create an OpenAI API client (that's edge-friendly!)
 const openai = new OpenAI({
@@ -17,7 +16,15 @@ export async function POST(req: Request): Promise<Response> {
   const { messages } = await req.json();
 
   // Define keywords for filtering user messages
-  const keywords = ["instalação", "configuração", "usuário", "segurança"];
+  const keywords = [
+    "instalação",
+    "configuração",
+    "usuário",
+    "segurança",
+    "ola",
+    "chama",
+    "ata",
+  ];
 
   // Start the conversation with a system message containing documentation
   const conversation: { role: string; content: string }[] = [
@@ -30,63 +37,60 @@ export async function POST(req: Request): Promise<Response> {
     },
   ];
 
-  // Add a training message to make the model introduce itself as "scAI"
   conversation.push({
     role: "assistant",
-    content: "Eu sou scAI, seu assistente virtual. Como posso ajudar?",
+    content: "Eu sou SCAI, seu assistente virtual. Como posso ajudar?",
   });
 
-  // Filter and add user messages to the conversation
-  let userMessageFound = false;
-  if (messages && messages.length > 0) {
-    for (const msg of messages) {
-      const messageText = msg.content.toLowerCase(); // Converte a mensagem para minúsculas
+  // Verifique se a mensagem do usuário é uma repetição da conversa anterior (verifique o cache)
+  const cachedResponse = responseCache.get(JSON.stringify(messages));
+  if (cachedResponse) {
+    return cachedResponse;
+  }
 
-      // Verifica se a mensagem do usuário contém alguma palavra-chave
+  // Verifique se alguma mensagem do usuário contém uma palavra-chave
+  const userMessageContainsKeyword = messages.some((msg) => {
+    const messageText = msg.content.toLowerCase(); // Converta a mensagem para minúsculas
+    return containsKeyword(messageText, keywords);
+  });
+
+  // Se a mensagem do usuário contém uma palavra-chave, continue com a lógica existente
+  if (userMessageContainsKeyword) {
+    // Adicione mensagens do usuário à conversa
+    for (const msg of messages) {
+      const messageText = msg.content.toLowerCase();
       if (containsKeyword(messageText, keywords)) {
         conversation.push({
           role: "user",
           content: msg.content,
         });
-        userMessageFound = true;
       }
     }
-  }
 
-  // Se o usuário não tiver mencionado nenhuma palavra-chave, o assistente fornecerá uma resposta automática
-  if (!userMessageFound) {
-    conversation.push({
-      role: "assistant",
-      content:
-        "Aqui está uma resposta automática quando nenhuma palavra-chave é encontrada.",
-    });
-  } else {
-    // Se uma mensagem com palavra-chave for encontrada, faça a requisição à API OpenAI
-    // Check if there is a cached response for this conversation
-    const cacheKey: string = JSON.stringify(conversation);
-    if (responseCache.has(cacheKey)) {
-      // Use the cached response
-      return responseCache.get(cacheKey) as Response;
-    }
-
-    // Request a response from the GPT-3.5 Turbo model (gpt-3.5-turbo)
+    // Solicite uma resposta da API OpenAI
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Use the GPT-3.5 Turbo model for chat
+      model: "gpt-3.5-turbo", // Use o modelo GPT-3.5 Turbo para o chat
       messages: conversation,
     });
 
-    // Extract and format the response text
+    // Extraia e formate o texto da resposta
     const responseData = response.choices[0]?.message?.content || "";
 
-    // Cache the response for future use
-    responseCache.set(cacheKey, new Response(responseData));
+    // Armazene a resposta em cache para uso futuro
+    responseCache.set(JSON.stringify(messages), new Response(responseData));
 
-    // Respond with the formatted text
+    // Responda com o texto formatado
     return new Response(responseData);
+  } else {
+    // Se a mensagem do usuário não contém uma palavra-chave, responda com a última mensagem do usuário
+    // em vez da mensagem padrão
+    const lastUserMessage = messages[messages.length - 1]?.content || "";
+    conversation.push({
+      role: "user",
+      content: lastUserMessage,
+    });
+    return new Response(lastUserMessage);
   }
-
-  // Respond with the formatted text for the automatic response
-  return new Response(conversation[conversation.length - 1].content);
 }
 
 // Função para verificar se a mensagem do usuário contém alguma palavra-chave
