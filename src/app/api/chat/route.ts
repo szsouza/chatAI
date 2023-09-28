@@ -1,4 +1,5 @@
 import { OpenAI } from "openai";
+import { Message } from "postcss";
 
 // Create an OpenAI API client (that's edge-friendly!)
 const openai = new OpenAI({
@@ -27,15 +28,16 @@ export async function POST(req: Request): Promise<Response> {
   ];
 
   // Start the conversation with a system message containing documentation
-  const conversation: { role: string; content: string }[] = [
-    {
-      role: "system",
-      content: `
-        **Documentação do Sistema de Fluxo de Processos**
-        ...
-      `,
-    },
-  ];
+  const conversation: OpenAI.Chat.Completions.CreateChatCompletionRequestMessage[] =
+    [
+      {
+        role: "system",
+        content: `
+      **Documentação do Sistema de Fluxo de Processos**
+      ...
+    `,
+      },
+    ];
 
   conversation.push({
     role: "assistant",
@@ -49,10 +51,12 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   // Verifique se alguma mensagem do usuário contém uma palavra-chave
-  const userMessageContainsKeyword = messages.some((msg) => {
-    const messageText = msg.content.toLowerCase(); // Converta a mensagem para minúsculas
-    return containsKeyword(messageText, keywords);
-  });
+  const userMessageContainsKeyword = messages.some(
+    (msg: { content: string }) => {
+      const messageText = msg.content.toLowerCase(); // Converta a mensagem para minúsculas
+      return containsKeyword(messageText, keywords);
+    }
+  );
 
   // Se a mensagem do usuário contém uma palavra-chave, continue com a lógica existente
   if (userMessageContainsKeyword) {
