@@ -1,3 +1,4 @@
+import { Message } from "ai/react";
 import { OpenAI } from "openai";
 
 // Create an OpenAI API client (that's edge-friendly!)
@@ -13,7 +14,7 @@ const responseCache: Map<string, Response> = new Map();
 
 export async function POST(req: Request): Promise<Response> {
   // Extract the `messages` from the body of the request
-  const { messages } = await req.json();
+  const { messages }: { messages: any[] } = await req.json();
 
   // Define keywords for filtering user messages
   const keywords = [
@@ -49,7 +50,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   // Verifique se alguma mensagem do usuário contém uma palavra-chave
-  const userMessageContainsKeyword = messages.some((msg) => {
+  const userMessageContainsKeyword = messages.some((msg: Message) => {
     const messageText = msg.content.toLowerCase(); // Converta a mensagem para minúsculas
     return containsKeyword(messageText, keywords);
   });
