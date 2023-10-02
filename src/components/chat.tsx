@@ -21,10 +21,8 @@ const Chat = () => {
   return (
     <Card className="w-[600px] ">
       <CardHeader>
-        <CardTitle>ChatAI</CardTitle>
-        <CardDescription>
-          usando o vercel sdk para criar um chat usando inteligencia artificial
-        </CardDescription>
+        <CardTitle>SC.AI</CardTitle>
+        <CardDescription>Fale com o SC.AI e tire suas duvidas</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="w-full h-[500px] space-y-4 pr-4">
@@ -48,7 +46,7 @@ const Chat = () => {
                 )}
                 <p className="leading-relaxed">
                   <span className="block font-bold text-slate-800">
-                    {message.role === "user" ? "Rodrigo" : "AI"}
+                    {message.role === "user" ? "Usuário" : "SC.AI"}
                   </span>
                   {message.content}
                 </p>

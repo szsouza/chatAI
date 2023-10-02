@@ -1,4 +1,5 @@
 import { OpenAI } from "openai";
+import { AIStream } from "ai";
 
 // Create an OpenAI API client (that's edge-friendly!)
 const openai = new OpenAI({
@@ -83,6 +84,7 @@ export async function POST(req: Request): Promise<Response> {
     responseCache.set(JSON.stringify(messages), new Response(responseData));
 
     // Responda com o texto formatado
+
     return new Response(responseData);
   } else {
     // Se a mensagem do usuário não contém uma palavra-chave, responda com a última mensagem do usuário
